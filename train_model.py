@@ -15,28 +15,48 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # =========================
-# 1. LOAD DATA
+# Load dataset
 # =========================
 df = pd.read_csv("data/flight_price_data.csv")
 
 print("Initial shape:", df.shape)
+
 # =========================
-# 2. DATA CLEANING
+# Basic cleaning
 # =========================
 df.dropna(inplace=True)
 
 # =========================
-# 3. USE EXISTING FEATURES
+# Feature engineering
 # =========================
 
-# Combine duration into minutes
+# Convert duration into total minutes (easier for model to understand)
 df["Duration_mins"] = df["Duration_hours"] * 60 + df["Duration_min"]
-
-# Drop original duration columns
 df.drop(["Duration_hours", "Duration_min"], axis=1, inplace=True)
 
+# Capture actual time difference between departure and arrival
+df["Time_diff"] = (
+    (df["Arrival_hours"] * 60 + df["Arrival_min"]) -
+    (df["Dep_hours"] * 60 + df["Dep_min"])
+)
+
+# Handle overnight flights (negative values)
+df["Time_diff"] = df["Time_diff"].apply(lambda x: x if x > 0 else x + 1440)
+
+# Identify peak departure hours (morning + evening rush)
+df["Is_peak_dep"] = df["Dep_hours"].apply(
+    lambda x: 1 if (6 <= x <= 10 or 17 <= x <= 21) else 0
+)
+
+# Categorize flight duration into buckets
+df["Duration_cat"] = pd.cut(
+    df["Duration_mins"],
+    bins=[0, 120, 300, 600, 2000],
+    labels=[0, 1, 2, 3]
+)
+
 # =========================
-# 4. HANDLE STOPS
+# Convert stops to numeric
 # =========================
 df["Total_Stops"] = df["Total_Stops"].map({
     "non-stop": 0,
@@ -49,23 +69,20 @@ df["Total_Stops"] = df["Total_Stops"].map({
 df["Total_Stops"] = df["Total_Stops"].fillna(0)
 
 # =========================
-# 5. DROP USELESS COLUMNS
+# Drop unnecessary columns
 # =========================
 df.drop(["Date"], axis=1, inplace=True)
 
-# =========================
-# 6. DROP USELESS COLUMN
-# =========================
 if "Route" in df.columns:
     df.drop(["Route"], axis=1, inplace=True)
 
 # =========================
-# 7. ENCODING
+# Convert categorical data
 # =========================
 df = pd.get_dummies(df, drop_first=True)
 
 # =========================
-# 8. SPLIT DATA
+# Split data
 # =========================
 X = df.drop("Price", axis=1)
 y = df["Price"]
@@ -75,25 +92,38 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # =========================
-# 9. TRAIN MODELS
+# Train models
 # =========================
-# Linear Regression
+
+# Simple baseline model
 lr = LinearRegression()
 lr.fit(X_train, y_train)
 lr_pred = lr.predict(X_test)
 
-# Random Forest
-rf = RandomForestRegressor(n_estimators=200, random_state=42)
+# Improved Random Forest
+rf = RandomForestRegressor(
+    n_estimators=300,
+    max_depth=20,
+    min_samples_split=5,
+    random_state=42
+)
 rf.fit(X_train, y_train)
 rf_pred = rf.predict(X_test)
 
-# XGBoost
-xgb = XGBRegressor(n_estimators=300, learning_rate=0.1, max_depth=6)
+# Tuned XGBoost (best model)
+xgb = XGBRegressor(
+    n_estimators=400,
+    learning_rate=0.05,
+    max_depth=5,
+    subsample=0.9,
+    colsample_bytree=0.9,
+    random_state=42
+)
 xgb.fit(X_train, y_train)
 xgb_pred = xgb.predict(X_test)
 
 # =========================
-# 10. EVALUATION FUNCTION
+# Evaluation
 # =========================
 def evaluate(name, y_test, y_pred):
     print(f"\n{name} Results:")
@@ -106,7 +136,7 @@ evaluate("Random Forest", y_test, rf_pred)
 evaluate("XGBoost", y_test, xgb_pred)
 
 # =========================
-# 11. SAVE MODEL
+# Save best model
 # =========================
 pickle.dump(xgb, open("model/model.pkl", "wb"))
 pickle.dump(X.columns, open("model/features.pkl", "wb"))

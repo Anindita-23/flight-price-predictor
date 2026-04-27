@@ -11,3 +11,4 @@ data/flight_price_data.csv
 
 /config.local
 *.pem
+DEPLOYMENT.md

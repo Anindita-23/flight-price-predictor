@@ -4,6 +4,3 @@ stages:
     deps:
       - train_model.py
       - data/flight_price_data.csv
-    outs:
-      - model/model.pkl
-      - model/features.pkl

@@ -4,8 +4,7 @@ __pycache__/
 .env
 
 # ── DVC ───────────────────────────────────────────────────────────────────────
-# DVC owns model/ and data/ — git only stores the .dvc pointer files
-model/
+# DVC owns data/ — git only stores the .dvc pointer files
 data/flight_price_data.csv
 .dvc/cache
 .dvc/tmp

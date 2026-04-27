@@ -1,0 +1,8 @@
+.git
+.dvc/cache
+.dvc/tmp
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.md

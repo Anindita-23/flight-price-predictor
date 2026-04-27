@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # ── Training service ─────────────────────────────────────────────────────────
   # Run with:  docker compose --profile train up train

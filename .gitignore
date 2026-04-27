@@ -10,3 +10,4 @@ data/flight_price_data.csv
 .dvc/tmp
 
 /config.local
+*.pem

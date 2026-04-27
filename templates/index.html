@@ -199,9 +199,9 @@
     .result::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
     }
-    .result.cheap::before { background-color: #10b981; }
-    .result.moderate::before { background-color: #f59e0b; }
-    .result.expensive::before { background-color: #ef4444; }
+    .result.cheap::before { background-color: #b3ffe5; }
+    .result.moderate::before { background-color: #e7ca99; }
+    .result.expensive::before { background-color: #d57979; }
 
     .result-label {
         font-size: 13px; color: var(--text-muted); margin-bottom: 8px;
@@ -212,9 +212,9 @@
         margin-bottom: 8px; letter-spacing: -1px;
     }
     .hint { font-size: 14px; font-weight: 500; }
-    .hint.cheap { color: #10b981; }
-    .hint.moderate { color: #f59e0b; }
-    .hint.expensive { color: #ef4444; }
+    .hint.cheap { color: #b3ffe5; }
+    .hint.moderate { color: #e7ca99; }
+    .hint.expensive { color: #d57979; }
 
     .leaflet-tooltip { 
         font-family: 'Inter', sans-serif; font-weight: 500; 
@@ -309,10 +309,16 @@
                     <label>Travel Month</label>
                     <select name="month">
                         <option value="1" {% if form_data and form_data.month=='1' %}selected{% endif %}>January</option>
+                        <option value="2" {% if form_data and form_data.month=='2' %}selected{% endif %}>February</option>
                         <option value="3" {% if form_data and form_data.month=='3' %}selected{% endif %}>March</option>
+                        <option value="4" {% if form_data and form_data.month=='4' %}selected{% endif %}>April</option>
                         <option value="5" {% if form_data and form_data.month=='5' %}selected{% endif %}>May</option>
+                        <option value="6" {% if form_data and form_data.month=='6' %}selected{% endif %}>June</option>
                         <option value="7" {% if form_data and form_data.month=='7' %}selected{% endif %}>July</option>
+                        <option value="8" {% if form_data and form_data.month=='8' %}selected{% endif %}>August</option>
+                        <option value="9" {% if form_data and form_data.month=='9' %}selected{% endif %}>September</option>
                         <option value="10" {% if form_data and form_data.month=='10' %}selected{% endif %}>October</option>
+                        <option value="11" {% if form_data and form_data.month=='11' %}selected{% endif %}>November</option>
                         <option value="12" {% if form_data and form_data.month=='12' %}selected{% endif %}>December</option>
                     </select>
                 </div>

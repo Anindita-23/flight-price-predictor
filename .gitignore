@@ -9,4 +9,5 @@ model/
 data/flight_price_data.csv
 .dvc/cache
 .dvc/tmp
-
+
+/config.local

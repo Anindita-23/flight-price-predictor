@@ -1,0 +1,9 @@
+stages:
+  train:
+    cmd: python train_model.py
+    deps:
+      - train_model.py
+      - data/flight_price_data.csv
+    outs:
+      - model/model.pkl
+      - model/features.pkl

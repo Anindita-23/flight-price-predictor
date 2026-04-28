@@ -18,7 +18,7 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application code
-COPY app.py predict.py ./
+COPY app.py ./
 COPY templates/ templates/
 
 # Model artefacts are mounted via docker-compose volume at runtime.

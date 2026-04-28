@@ -5,8 +5,11 @@ import pandas as pd
 app = Flask(__name__)
 
 # Load model
-model = pickle.load(open("model/model.pkl", "rb"))
+models = pickle.load(open("model/model.pkl", "rb"))
 features = pickle.load(open("model/features.pkl", "rb"))
+
+xgb = models["xgb"]
+lr = models["lr"]
 
 @app.route("/")
 def home():
@@ -28,9 +31,7 @@ def predict():
         "Duration_mins": int(form["duration"])
     }
 
-    # =========================
-    # 🟢 FEATURE ENGINEERING (MATCH TRAINING)
-    # =========================
+    # FEATURE ENGINEERING (MATCH TRAINING)
 
     # Time difference
     time_diff = (
@@ -58,39 +59,17 @@ def predict():
     elif dur > 600:
         data["Duration_cat_3"] = 1
 
-    # =========================
-    # 🟢 NEW FEATURES (IMPORTANT)
-    # =========================
-
+    # BASIC INPUTS
     airline = form.get("airline")
     source = form.get("source")
     destination = form.get("destination")
 
-    # Route
-    route = f"{source}_{destination}"
-
-    # Time block
-    if 5 <= dep_hour < 12:
-        data["Dep_time_block"] = 0
-    elif 12 <= dep_hour < 17:
-        data["Dep_time_block"] = 1
-    elif 17 <= dep_hour < 22:
-        data["Dep_time_block"] = 2
-    else:
-        data["Dep_time_block"] = 3
-
-    # Interaction
-    data["Stops_x_Duration"] = data["Total_Stops"] * data["Duration_mins"]
-
-    # =========================
-    # 🟢 DYNAMIC ONE-HOT ENCODING
-    # =========================
+    # ONE-HOT ENCODING
 
     # Airlines
     for col in features:
         if col.startswith("Airline_"):
             data[col] = 0
-
     if f"Airline_{airline}" in features:
         data[f"Airline_{airline}"] = 1
 
@@ -98,7 +77,6 @@ def predict():
     for col in features:
         if col.startswith("Source_"):
             data[col] = 0
-
     if f"Source_{source}" in features:
         data[f"Source_{source}"] = 1
 
@@ -106,29 +84,21 @@ def predict():
     for col in features:
         if col.startswith("Destination_"):
             data[col] = 0
-
     if f"Destination_{destination}" in features:
         data[f"Destination_{destination}"] = 1
 
-    # Route
-    for col in features:
-        if col.startswith("Route_"):
-            data[col] = 0
-
-    if f"Route_{route}" in features:
-        data[f"Route_{route}"] = 1
-
-    # =========================
-    # 🟢 FINAL DATAFRAME
-    # =========================
+    # FINAL DATAFRAME
     df = pd.DataFrame([data])
     df = df.reindex(columns=features, fill_value=0)
 
-    prediction = model.predict(df)
+    # ENSEMBLE PREDICTION
+    xgb_pred = xgb.predict(df)
+    lr_pred = lr.predict(df)
+    final_pred = 0.85 * xgb_pred + 0.15 * lr_pred
 
     return render_template(
         "index.html",
-        prediction=int(prediction[0]),
+        prediction=int(final_pred[0]),
         form_data=request.form
     )
 
